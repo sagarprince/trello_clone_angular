@@ -1,0 +1,11 @@
+<div class="board-title">{{board.title}}</div>
+<div class="board-actions">
+    <ng-template [ngIf]="isLoading">
+        <div class="loading">
+            <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+        </div>
+    </ng-template>
+    <button type="button" class="mark-star-board" [class.starred]="board.starred" (click)="onToggleBoardStarred()">
+        <i class="fa" [class.fa-star-o]="!board.starred" [class.fa-star]="board.starred" aria-hidden="true"></i>
+    </button>
+</div>

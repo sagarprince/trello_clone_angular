@@ -1,0 +1,56 @@
+.container {
+    padding: 20px;
+}
+
+section {
+    &.starred-boards-section {
+        margin-bottom: 30px;
+    }
+    
+    h3 {
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+        margin: 3px 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #172B4D;
+    }
+
+    .loading {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    ul {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        list-style-type: none;
+        margin: 20px 0 0;
+        padding: 0;
+
+        li {
+            position: relative;
+            background-color: #172B4D;
+            height: 60px;
+            padding: 20px;
+            cursor: pointer;
+            border-radius: 3px;
+
+            &.create-board {
+                background-color: #091E420F;
+                color: #172B4D;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                &:hover {
+                    background-color: #091E4224;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,41 @@
+.board-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    color: white;
+    font-weight: 500;
+}
+
+.board-actions {
+    position: absolute;
+    top: auto;
+    bottom: 15px;
+    left: auto;
+    right: 15px;
+}
+
+.loading {
+    position: absolute;
+    top: 0;
+    left: -3px;
+}
+
+button.mark-star-board {
+    background-color: transparent;
+    padding: 0;
+    border: 0 none;
+    color: white;
+    cursor: pointer;
+    transition: transform 500ms;
+    transition-timing-function: cubic-bezier(.75, -3, .25, .4);
+
+    &.starred {
+        color: #e2b203;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+    }
+}

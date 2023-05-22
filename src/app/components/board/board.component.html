@@ -1,0 +1,33 @@
+<div class="board">
+    <div class="board__header">
+        <h2>{{board()?.title}}</h2>
+    </div>
+    <div class="board__content">
+        <ng-template [ngIf]="isLoading()">
+            <div class="loader">
+                <mat-spinner diameter="60" strokeWidth="4"></mat-spinner>
+            </div>
+        </ng-template>
+        <ng-template [ngIf]="!isLoading()">
+            <div class="lists">
+                <ul>
+                    <li *ngFor="let list of lists(); trackBy: trackByList">
+                        <app-list [list]="list" [isLoading]="list.isLoading || false"
+                            [isEditable]="list.isEditable || false"></app-list>
+                    </li>
+                    <li class="add-new-list">
+                        <ng-template [ngIf]="!isCreateNewList()" [ngIfElse]="createNewListForm">
+                            <span (click)="onToggleCreateNewList()">+ Add New List</span>
+                        </ng-template>
+                        <ng-template #createNewListForm>
+                            <div class="add-new-list-form">
+                                <app-add-new-list-form [boardId]="boardId"
+                                    (onClose)="onToggleCreateNewList()"></app-add-new-list-form>
+                            </div>
+                        </ng-template>
+                    </li>
+                </ul>
+            </div>
+        </ng-template>
+    </div>
+</div>

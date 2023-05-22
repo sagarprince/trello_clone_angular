@@ -1,18 +1,18 @@
-<div class="container">
+<div class="boards-container">
     <ng-template [ngIf]="hasStarredBoards()">
         <section class="starred-boards-section">
             <h3>
-                <i class="fa fa-user" aria-hidden="true"></i> Starred Boards
+                Starred Boards
             </h3>
-            <ng-template [ngIf]="loading()">
+            <ng-template [ngIf]="isLoading()">
                 <div class="loading">
                     <mat-spinner diameter="60" strokeWidth="4"></mat-spinner>
                 </div>
             </ng-template>
-            <ng-template [ngIf]="!loading()">
+            <ng-template [ngIf]="!isLoading()">
                 <ul>
                     <ng-container *ngFor="let board of starredBoards(); let i = index">
-                        <li [style.backgroundColor]="board.color">
+                        <li>
                             <app-board-card [board]="board" [isLoading]="board.isLoading || false"
                                 (onToggleBoardStarred)="onToggleBoardStarred($event)"></app-board-card>
                         </li>
@@ -23,17 +23,18 @@
     </ng-template>
     <section>
         <h3>
-            <i class="fa fa-user" aria-hidden="true"></i> Your Boards
+            <!-- <i class="fa fa-user" aria-hidden="true"></i>  -->
+            Your Boards
         </h3>
-        <ng-template [ngIf]="loading()">
+        <ng-template [ngIf]="isLoading()">
             <div class="loading">
                 <mat-spinner diameter="60" strokeWidth="4"></mat-spinner>
             </div>
         </ng-template>
-        <ng-template [ngIf]="!loading()">
+        <ng-template [ngIf]="!isLoading()">
             <ul>
                 <ng-container *ngFor="let board of boards(); let i = index">
-                    <li [style.backgroundColor]="board.color">
+                    <li>
                         <app-board-card [board]="board" [isLoading]="board.isLoading || false"
                             (onToggleBoardStarred)="onToggleBoardStarred($event)"></app-board-card>
                     </li>

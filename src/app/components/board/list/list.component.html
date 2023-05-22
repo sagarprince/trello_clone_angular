@@ -1,0 +1,26 @@
+<div class="list" [class.dragging]="selectedCard() != null" [class.active]="list.id == dragOnList()?.id">
+    <div class="list__header">
+        <span class="text" [class.editable]="isEditable" (click)="onToggleListEditable()">{{list.title}}</span>
+        <div class="input" [class.editable]="isEditable">
+            <input type="text" [(ngModel)]="title" (keyup.enter)="onUpdateList()" />
+            <ng-template [ngIf]="isLoading">
+                <div class="loader">
+                    <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
+                </div>
+            </ng-template>
+        </div>
+        <span class="icon"></span>
+    </div>
+    <div class="list__cards">
+        <ul>
+            <li *ngFor="let card of cards(); trackBy: trackByCard">
+                <app-card [card]="card" [isLoading]="card.isLoading || false" [isDeleting]="card.isDeleting || false"
+                    (onEdit)="onEditCard($event)" (onDelete)="onDeleteCard($event)"
+                    (onMarkDone)="onMarkDoneCard($event)"></app-card>
+            </li>
+            <li class="add-new-card" (click)="onCreateCard()">
+                + Add New Card
+            </li>
+        </ul>
+    </div>
+</div>

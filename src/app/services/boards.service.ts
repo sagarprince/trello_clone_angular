@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, Signal, computed, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Board } from '../models/board.model';
 
@@ -9,10 +9,29 @@ const BOARDS_TABLE = 'boards';
 })
 export class BoardsService {
 
-  boards = signal<Board[]>([]);
-  loading = signal<boolean>(false);
-  isCRUDLoading = signal<boolean>(false);
-  private defaultColors: string[] = ['#4b16f9', '#4bbcc6', '#c43c67', '#69f4df', '#fc9a3f', '#8043b2', '#ea7082'];
+  public boards = signal<Board[]>([]);
+  public isLoading = signal<boolean>(false);
+  public isCRUDLoading = signal<boolean>(false);
+
+  public starredBoards = computed(() => {
+    return this.boards().filter((board) => board.starred);
+  });
+
+  public hasStarredBoards = computed(() => {
+    return this.starredBoards().length > 0;
+  });
+
+  public selectedBoardId = signal<any>(null);
+
+  public selectedBoard: Signal<Board | null> = computed(() => {
+    const id = this.selectedBoardId();
+    if (id) {
+      return this.boards().find((board) => board.id === id) || null;
+    }
+    return null;
+  });
+
+  private defaultColors: string[] = ['#EEF7FB', '#F8F1FF', '#FEF7EF', '#EBFDF5', '#EEF7FB', '#F4F4FF', '#F4F4F4', '#F8E8E8'];
   private colors: string[] = [];
 
   constructor(private supabaseService: SupabaseService) {
@@ -20,7 +39,7 @@ export class BoardsService {
   }
 
   async getBoards() {
-    this.loading.set(true);
+    this.isLoading.set(true);
     try {
       const result = await this.supabaseService.client.from(BOARDS_TABLE)
         .select('*');
@@ -33,7 +52,7 @@ export class BoardsService {
     } catch (err) {
       console.log(err);
     } finally {
-      this.loading.set(false);
+      this.isLoading.set(false);
     }
   }
 
@@ -80,4 +99,7 @@ export class BoardsService {
     }
   }
 
+  setSelectedBoardId(id: any) {
+    this.selectedBoardId.set(id);
+  }
 }

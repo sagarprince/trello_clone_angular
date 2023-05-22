@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, WritableSignal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BoardsService } from '../../services/boards.service';
-import { CreateBoardDialogComponent } from './create-board-dialog/create-board-dialog.component';
+import { CreateBoardModalComponent } from './create-board-modal/create-board-modal.component';
 import { Board } from 'src/app/models/board.model';
 import { BoardCardComponent } from './board-card/board-card.component';
 
@@ -17,7 +17,7 @@ import { BoardCardComponent } from './board-card/board-card.component';
     MatButtonModule,
     NgIf,
     NgFor,
-    BoardCardComponent
+    BoardCardComponent,
   ],
   templateUrl: './boards.component.html',
   styleUrls: ['./boards.component.scss'],
@@ -25,27 +25,21 @@ import { BoardCardComponent } from './board-card/board-card.component';
 })
 export class BoardsComponent {
   public boards: WritableSignal<Board[]>;
-  public loading: WritableSignal<boolean>;
-
-  public starredBoards = computed(() => {
-    return this.boards().filter((board) => board.starred);
-  });
-
-  public hasStarredBoards = computed(() => {
-    return this.starredBoards().length > 0;
-  });
+  public isLoading: WritableSignal<boolean>;
+  public starredBoards: Signal<Board[]>;
+  public hasStarredBoards: Signal<boolean>;
 
   constructor(private dialog: MatDialog, private boardsService: BoardsService) {
     this.boards = this.boardsService.boards;
-    this.loading = this.boardsService.loading;
+    this.isLoading = this.boardsService.isLoading;
+    this.starredBoards = this.boardsService.starredBoards;
+    this.hasStarredBoards = this.boardsService.hasStarredBoards;
   }
 
-  ngOnInit() {
-    this.boardsService.getBoards();
-  }
+  ngOnInit() {}
 
   public onCreateBoard(): void {
-    this.dialog.open(CreateBoardDialogComponent, {
+    this.dialog.open(CreateBoardModalComponent, {
       height: '230px',
       width: '400px',
       data: {},

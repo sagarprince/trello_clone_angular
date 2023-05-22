@@ -1,0 +1,35 @@
+.mdc-dialog__title {
+    margin: 0 0 15px;
+    background: #f4f4f4;
+    text-align: center;
+    padding: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+
+    &::before {
+        content: none;
+    }
+}
+
+.mdc-dialog__title + .mdc-dialog__content {
+    padding-top: 10px;
+}
+
+.form-field {
+    margin-top: 15px;
+
+    &:first-child {
+        margin-top: 0;
+    }
+}
+
+.mat-mdc-form-field {
+    width: 100%;
+}
+
+.mat-mdc-dialog-actions {
+    justify-content: center;
+}

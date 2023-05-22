@@ -5,11 +5,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { DialogModule } from '@angular/cdk/dialog';
 import { BoardsService } from '../../../services/boards.service';
 
 @Component({
-  selector: 'app-create-board-dialog',
+  selector: 'app-create-board-modal',
   standalone: true,
   imports: [
     CommonModule,
@@ -17,20 +16,19 @@ import { BoardsService } from '../../../services/boards.service';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatDialogModule,
-    DialogModule,
     MatInputModule,
     MatButtonModule,
   ],
-  templateUrl: './create-board-dialog.component.html',
-  styleUrls: ['./create-board-dialog.component.scss'],
+  templateUrl: './create-board-modal.component.html',
+  styleUrls: ['./create-board-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateBoardDialogComponent {
+export class CreateBoardModalComponent {
   form!: FormGroup;
   isLoading: WritableSignal<boolean>;
 
   constructor(
-    public dialogRef: MatDialogRef<CreateBoardDialogComponent>,
+    public dialogRef: MatDialogRef<CreateBoardModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private fb: FormBuilder,
     private boardsService: BoardsService

@@ -1,0 +1,13 @@
+.form {
+    .form-field {
+        .mat-mdc-form-field {
+            width: 100%;
+        }
+    }
+    .form-actions {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

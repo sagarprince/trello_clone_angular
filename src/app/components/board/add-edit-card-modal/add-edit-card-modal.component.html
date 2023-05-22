@@ -1,0 +1,29 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h1 mat-dialog-title>{{list.title}} - {{mode === 'ADD' ? 'Add Card' : 'Edit Card'}}</h1>
+    <div mat-dialog-content>
+        <div class="form-field">
+            <mat-form-field appearance="outline">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="title">
+                <mat-error *ngIf="form.get('title')?.invalid">Please enter a card name.</mat-error>
+            </mat-form-field>
+        </div>
+        <div class="form-field">
+            <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="form-field">
+            <mat-form-field appearance="outline">
+                <mat-label>Attachments</mat-label>
+                <textarea matInput formControlName="attachments"></textarea>
+                <mat-hint>Add URL's seperated by commas.</mat-hint>
+            </mat-form-field>
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <button type="button" mat-button (click)="onCancel()">Cancel</button>
+        <button type="submit" mat-button color="primary" cdkFocusInitial [disabled]="isLoading()">Save</button>
+    </div>
+</form>

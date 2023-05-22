@@ -1,19 +1,44 @@
+.board-card {
+    position: relative;
+    background-color: #f4f4ff;
+    height: 60px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 8px 5px 20px -12px rgba(0, 0, 0, 0.38);
+}
+
 .board-title {
+    font-size: 16px;
+    font-weight: 400;
+    color: #000000;
     overflow: hidden;
     text-overflow: ellipsis;
     -webkit-box-orient: vertical;
     display: -webkit-box;
     -webkit-line-clamp: 2;
-    color: white;
-    font-weight: 500;
+    padding-right: 20px;
+    cursor: pointer;
 }
 
 .board-actions {
+    position: absolute;
+    top: 20px;
+    bottom: auto;
+    left: auto;
+    right: 18px;
+}
+
+.board-link {
     position: absolute;
     top: auto;
     bottom: 15px;
     left: auto;
     right: 15px;
+    background-image: url('../../../../assets/images/arrow-forward-outline.png');
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
 }
 
 .loading {
@@ -26,10 +51,10 @@ button.mark-star-board {
     background-color: transparent;
     padding: 0;
     border: 0 none;
-    color: white;
+    color: #000000;
     cursor: pointer;
     transition: transform 500ms;
-    transition-timing-function: cubic-bezier(.75, -3, .25, .4);
+    transition-timing-function: cubic-bezier(0.75, -3, 0.25, 0.4);
 
     &.starred {
         color: #e2b203;

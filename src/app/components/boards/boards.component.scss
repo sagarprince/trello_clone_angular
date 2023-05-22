@@ -1,21 +1,19 @@
-.container {
-    padding: 20px;
-}
-
 section {
+    padding: 20px;
+    
     &.starred-boards-section {
         margin-bottom: 30px;
     }
-    
+
     h3 {
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 24px;
+        font-size: 26px;
+        font-weight: 400;
+        line-height: 38px;
         margin: 3px 0 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        color: #172B4D;
+        color: #000000;
     }
 
     .loading {
@@ -34,21 +32,22 @@ section {
         padding: 0;
 
         li {
-            position: relative;
-            background-color: #172B4D;
-            height: 60px;
-            padding: 20px;
-            cursor: pointer;
-            border-radius: 3px;
-
             &.create-board {
-                background-color: #091E420F;
-                color: #172B4D;
+                background: #ffffff;
+                border: 1px dashed rgba(0, 0, 0, 0.2);
+                color: #000;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                height: 60px;
+                padding: 20px;
+                font-weight: 400;
+                font-size: 16px;
+                line-height: 24px;
+                border-radius: 10px;
+                cursor: pointer;
                 &:hover {
-                    background-color: #091E4224;
+                    background-color: #091e4224;
                 }
             }
         }

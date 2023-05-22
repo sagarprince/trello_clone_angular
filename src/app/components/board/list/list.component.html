@@ -1,4 +1,4 @@
-<div class="list" [class.dragging]="selectedCard() != null" [class.active]="list.id == dragOnList()?.id">
+<div class="list" [class.dragging]="dragOnList()?.id" [class.active]="list.id == dragOnList()?.id">
     <div class="list__header">
         <span class="text" [class.editable]="isEditable" (click)="onToggleListEditable()">{{list.title}}</span>
         <div class="input" [class.editable]="isEditable">
@@ -13,7 +13,7 @@
     </div>
     <div class="list__cards">
         <ul>
-            <li *ngFor="let card of cards(); trackBy: trackByCard">
+            <li *ngFor="let card of cards() | sortBy: sortFn; trackBy: trackByCard" [attr.position]="card.position">
                 <app-card [card]="card" [isLoading]="card.isLoading || false" [isDeleting]="card.isDeleting || false"
                     (onEdit)="onEditCard($event)" (onDelete)="onDeleteCard($event)"
                     (onMarkDone)="onMarkDoneCard($event)"></app-card>

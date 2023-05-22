@@ -11,12 +11,13 @@ import { DragDropCardsService } from 'src/app/services/drag-drop-cards.service';
 import { CardComponent } from '../card/card.component';
 import { AddEditCardModalComponent } from '../add-edit-card-modal/add-edit-card-modal.component';
 import { ConfirmationModalComponent } from '../../confirmation-modal/confirmation-modal.component';
+import { SortByPipe } from '../../../pipes/sort-by.pipe';
 
 
 @Component({
   selector: 'app-list',
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule, MatDialogModule, MatProgressSpinnerModule, CardComponent, AddEditCardModalComponent],
+  imports: [NgIf, NgFor, FormsModule, MatDialogModule, MatProgressSpinnerModule, SortByPipe, CardComponent, AddEditCardModalComponent],
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -82,7 +83,8 @@ export class ListComponent {
       width: '600px',
       data: {
         mode: 'ADD',
-        list: this.list
+        list: this.list,
+        position: this.cards().length + 1
       },
     });
   }
@@ -118,12 +120,20 @@ export class ListComponent {
     });
   }
 
+  trackByCard(_: number, card: Card): Card {
+    return card.id;
+  }
+
+  sortFn(card1: Card, card2: Card) {
+    return card1.position - card2.position;
+  }
+
   @HostListener('dragover', ['$event'])
   onDragOver(event: DragEvent) {
     event.preventDefault();
-    this.dragDropCardsService.setDragOnList(this.list);
     const card = this.selectedCard();
     if (card && card?.list_id !== this.list.id) {
+      this.dragDropCardsService.setDragOnList(this.list);
       this.cardsService.updateCardList(card?.id, this.list.id);
     }
   }
@@ -138,13 +148,18 @@ export class ListComponent {
       }, false, () => {
         this.cardsService.updateCardList(card?.id, card?.prevListId);
       });
+
+      // Update Cards Positions
+
+      console.log(this.cards());
+
+      this.cards().sort((a: any, b: any) => a.position - b.position).forEach((card, i) => {
+        this.cardsService.updateCardPosition(card.id, i + 1);
+      });
+
       this.dragDropCardsService.setCard(null);
       this.dragDropCardsService.setDragOnList(null);
     }
-  }
-
-  trackByCard(_: number, card: Card): Card {
-    return card.id;
   }
 
   @HostListener('document:click', ['$event'])

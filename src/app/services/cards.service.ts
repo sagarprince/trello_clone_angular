@@ -28,27 +28,24 @@ export class CardsService {
     }
   }
 
-  async saveCard({
-    mode = 'ADD', listId, boardId, cardId, title, description = '', attachments = '', done = false
-  }: {
-    mode: string;
-    listId: number;
-    boardId: number;
-    cardId?: number;
+  async saveCard(mode: string = 'ADD', cardId: number, values: {
+    list_id: number;
+    board_id: number;
     title: string;
     description?: string;
     attachments?: string;
-    done?: boolean
+    done?: boolean;
+    position?: number;
   }) {
     this.isCRUDLoading.set(true);
     const i = mode === 'EDIT' ? this.cards().findIndex((card) => card.id === cardId) : -1;
     try {
       if (mode === 'ADD') {
-        const result = await this.supabaseService.client.from(CARDS_TABLE)
-          .insert({ 'list_id': listId, 'board_id': boardId, title, description, attachments, done })
+        const { data } = await this.supabaseService.client.from(CARDS_TABLE)
+          .insert({ ...values })
           .select('*').single();
-        result.data && this.cards.update((value) => {
-          return [...value, result.data as Card];
+        data && this.cards.update((value) => {
+          return [...value, data as Card];
         });
       } else {
         if (i > -1) {
@@ -56,7 +53,7 @@ export class CardsService {
             value[i].isLoading = true;
           });
           const result = await this.supabaseService.client.from(CARDS_TABLE)
-            .update({ title, description, attachments, done })
+            .update({ ...values })
             .eq('id', cardId)
             .select('*').single();
           this.cards.mutate(value => {
@@ -84,7 +81,7 @@ export class CardsService {
       this.cards.mutate(value => {
         value[i].isLoading = true;
       });
-      const { data, error } = await this.supabaseService.client.from(CARDS_TABLE)
+      const { data } = await this.supabaseService.client.from(CARDS_TABLE)
         .update(values)
         .eq('id', cardId)
         .select('*').single();
@@ -114,16 +111,18 @@ export class CardsService {
       this.cards.mutate(value => {
         value[i].isDeleting = true;
       });
-      await this.supabaseService.client.from(CARDS_TABLE)
+      const { error } = await this.supabaseService.client.from(CARDS_TABLE)
         .delete()
         .eq('id', cardId);
-      const cards = this.cards();
-      this.cards.set(cards.filter((card) => card.id !== cardId));
+      if (!error) {
+        const cards = this.cards();
+        this.cards.set(cards.filter((card) => card.id !== cardId));
+      }
     } catch (err) {
       console.log(err);
     } finally {
       this.isCRUDLoading.set(false);
-      this.cards.mutate(value => {
+      this.cards().length > 0 && this.cards.mutate(value => {
         value[i].isDeleting = false;
       });
     }
@@ -133,6 +132,13 @@ export class CardsService {
     const i = this.cards().findIndex((card) => card.id === cardId);
     this.cards.mutate(value => {
       value[i].list_id = listId;
+    });
+  }
+
+  async updateCardPosition(cardId: any, position: any) {
+    const i = this.cards().findIndex((card) => card.id === cardId);
+    this.cards.mutate(value => {
+      value[i].position = position;
     });
   }
 }

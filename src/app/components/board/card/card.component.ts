@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, 
 import { NgIf } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Card } from '../../../models/card.model';
-import { DragDropCardsService } from 'src/app/services/drag-drop-cards.service';
+import { DragDropCardsService } from '../../../services/drag-drop-cards.service';
+import { CardsService } from '../../../services/cards.service';
 
 @Component({
   selector: 'app-card',
@@ -21,8 +22,10 @@ export class CardComponent {
   @Output('onMarkDone') _onMarkDone: EventEmitter<Card> = new EventEmitter<Card>();
 
   selectedCard!: Signal<Card | null>;
+  positionA: number = -1;
+  positionB: number = -1;
 
-  constructor(private dragDropCardsService: DragDropCardsService) {
+  constructor(private dragDropCardsService: DragDropCardsService, private cardsService: CardsService) {
     this.selectedCard = this.dragDropCardsService.selectedCard;
   }
 
@@ -49,7 +52,6 @@ export class CardComponent {
     this._onMarkDone.emit(this.card);
   }
 
-
   @HostListener('dragstart', ['$event'])
   onDragStart(event: DragEvent) {
     this.card.prevListId = this.card.list_id;
@@ -59,5 +61,39 @@ export class CardComponent {
   @HostListener('dragend', ['$event'])
   onDragEnd(event: DragEvent) {
     this.dragDropCardsService.setCard(null);
+  }
+
+  @HostListener('dragover', ['$event'])
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+  }
+
+  @HostListener('dragenter', ['$event'])
+  onDragEnter(_: DragEvent) {
+    const card = this.selectedCard();
+    // console.log('Drag Enter ', card, this.card);
+    if (card?.id !== this.card.id) {
+      this.positionA = card?.position || -1;
+      this.positionB = this.card.position || -1;
+      console.log(this.positionB, this.positionA);
+      this.cardsService.updateCardPosition(card?.id, this.positionB);
+      this.cardsService.updateCardPosition(this.card.id, this.positionA);
+    }
+  }
+
+  @HostListener('drop', ['$event'])
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    const card = this.selectedCard();
+    console.log(this.positionB, this.positionA);
+    if (this.positionA > -1 && this.positionB > -1) {
+      this.cardsService.updateCard(card?.id, {
+        position: this.positionB
+      }, false);
+      this.cardsService.updateCard(this.card.id, {
+        position: this.positionA
+      }, false);
+      // this.positionA = this.positionB = -1;
+    }
   }
 }

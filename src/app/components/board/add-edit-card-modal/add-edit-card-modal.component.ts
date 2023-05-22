@@ -30,6 +30,7 @@ export class AddEditCardModalComponent {
   mode: string = 'ADD';
   list: List;
   card: Card;
+  position: number;
 
   isLoading: WritableSignal<boolean>;
 
@@ -42,6 +43,7 @@ export class AddEditCardModalComponent {
     this.mode = this.data && this.data.mode || 'ADD';
     this.list = this.data && this.data.list || null;
     this.card = this.data && this.data.card || null;
+    this.position = this.data && this.data.position || 1;
     this.isLoading = this.cardsService.isCRUDLoading;
     this.setupForm();
   }
@@ -69,15 +71,15 @@ export class AddEditCardModalComponent {
   private async saveCard() {
     const { title, description, attachments } = this.form.value;
     try {
-      await this.cardsService.saveCard({
-        mode: this.mode,
-        listId: this.list.id,
-        boardId: this.list.board_id,
-        cardId: this.card && this.card.id,
-        title,
-        description: description.trim(),
-        attachments: attachments && attachments.trim()
-      });
+      await this.cardsService.saveCard(this.mode, this.card && this.card.id,
+        {
+          list_id: this.list.id,
+          board_id: this.list.board_id,
+          title,
+          description: description.trim(),
+          attachments: attachments && attachments.trim(),
+          position: this.position
+        });
       this.onCancel();
     } catch (err) {
       console.log(err);

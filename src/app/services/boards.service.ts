@@ -1,4 +1,4 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, computed, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Board } from '../models/board.model';
 
@@ -71,6 +71,58 @@ export class BoardsService {
       });
     } catch (err) {
       console.log(err);
+    } finally {
+      this.isCRUDLoading.set(false);
+    }
+  }
+
+  async updateBoard(boardId: any, title: string) {
+    this.isCRUDLoading.set(true);
+    const i = this.boards().findIndex((board) => board.id === boardId);
+    this.boards.mutate(value => {
+      value[i].isLoading = true;
+    });
+    try {
+      await this.supabaseService.client.from(BOARDS_TABLE)
+        .update({ title })
+        .eq('id', boardId)
+        .select('*').single();
+      this.boards.mutate(value => {
+        value[i].title = title;
+      });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      this.isCRUDLoading.set(false);
+      this.boards.mutate(value => {
+        value[i].isLoading = false;
+      });
+    }
+  }
+
+  async deleteBoard(boardId: any) {
+    this.isCRUDLoading.set(true);
+    const i = this.boards().findIndex((board) => board.id === boardId);
+    try {
+      this.boards.mutate(value => {
+        value[i].isDeleting = true;
+      });
+      const { error } = await this.supabaseService.client.from(BOARDS_TABLE)
+        .delete()
+        .eq('id', boardId);
+      if (!error) {
+        const boards = this.boards();
+        this.boards.set(boards.filter((board) => board.id !== boardId));
+      } else {
+        this.boards().length > 0 && this.boards.mutate(value => {
+          value[i].isDeleting = false;
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      this.boards().length > 0 && this.boards.mutate(value => {
+        value[i].isDeleting = false;
+      });
     } finally {
       this.isCRUDLoading.set(false);
     }

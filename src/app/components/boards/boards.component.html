@@ -14,7 +14,9 @@
                     <ng-container *ngFor="let board of starredBoards(); let i = index">
                         <li>
                             <app-board-card [board]="board" [isLoading]="board.isLoading || false"
-                                (onToggleBoardStarred)="onToggleBoardStarred($event)"></app-board-card>
+                                [isDeleting]="board.isDeleting || false"
+                                (onToggleBoardStarred)="onToggleBoardStarred($event)"
+                                (onDelete)="onDeleteBoard($event)"></app-board-card>
                         </li>
                     </ng-container>
                 </ul>
@@ -23,7 +25,6 @@
     </ng-template>
     <section>
         <h3>
-            <!-- <i class="fa fa-user" aria-hidden="true"></i>  -->
             Your Boards
         </h3>
         <ng-template [ngIf]="isLoading()">
@@ -36,7 +37,9 @@
                 <ng-container *ngFor="let board of boards(); let i = index">
                     <li>
                         <app-board-card [board]="board" [isLoading]="board.isLoading || false"
-                            (onToggleBoardStarred)="onToggleBoardStarred($event)"></app-board-card>
+                            [isDeleting]="board.isDeleting || false"
+                            (onToggleBoardStarred)="onToggleBoardStarred($event)"
+                            (onDelete)="onDeleteBoard($event)"></app-board-card>
                     </li>
                 </ng-container>
                 <li class="create-board" (click)="onCreateBoard()">

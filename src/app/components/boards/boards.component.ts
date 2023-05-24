@@ -7,6 +7,7 @@ import { BoardsService } from '../../services/boards.service';
 import { CreateBoardModalComponent } from './create-board-modal/create-board-modal.component';
 import { Board } from 'src/app/models/board.model';
 import { BoardCardComponent } from './board-card/board-card.component';
+import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-boards',
@@ -18,6 +19,7 @@ import { BoardCardComponent } from './board-card/board-card.component';
     NgIf,
     NgFor,
     BoardCardComponent,
+    ConfirmationModalComponent
   ],
   templateUrl: './boards.component.html',
   styleUrls: ['./boards.component.scss'],
@@ -36,7 +38,7 @@ export class BoardsComponent {
     this.hasStarredBoards = this.boardsService.hasStarredBoards;
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   public onCreateBoard(): void {
     this.dialog.open(CreateBoardModalComponent, {
@@ -48,5 +50,19 @@ export class BoardsComponent {
 
   public onToggleBoardStarred(board: Board) {
     this.boardsService.toggleStarredBoard(board.id, board.starred);
+  }
+
+  public onDeleteBoard(boardId: any): void {
+    this.dialog.open(ConfirmationModalComponent, {
+      width: "400px",
+      data: {
+        title: 'Delete Board',
+        message: 'Are you sure you want to do this?'
+      }
+    }).afterClosed().subscribe((result) => {
+      if (result) {
+        this.boardsService.deleteBoard(boardId);
+      }
+    });
   }
 }

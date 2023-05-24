@@ -1,10 +1,13 @@
 .board-card {
     position: relative;
     background-color: #f4f4ff;
-    height: 60px;
+    height: 80px;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 8px 5px 20px -12px rgba(0, 0, 0, 0.38);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .board-title {
@@ -20,47 +23,70 @@
     cursor: pointer;
 }
 
+button {
+    background-color: transparent;
+    padding: 0;
+    border: 0 none;
+}
+
 .board-actions {
     position: absolute;
     top: 20px;
     bottom: auto;
     left: auto;
     right: 18px;
+
+    button {
+        position: relative;
+        color: #000000;
+        transition: transform 500ms;
+        transition-timing-function: cubic-bezier(0.75, -3, 0.25, 0.4);
+
+        &.starred {
+            color: #e2b203;
+        }
+
+        &:hover {
+            transform: scale(1.1);
+        }
+
+        .loading {
+            position: absolute;
+            top: -2px;
+            left: -4px;
+        }
+    }
 }
 
-.board-link {
-    position: absolute;
-    top: auto;
-    bottom: 15px;
-    left: auto;
-    right: 15px;
-    background-image: url('../../../../assets/images/arrow-forward-outline.png');
-    background-repeat: no-repeat;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
+.board-bottom-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-.loading {
-    position: absolute;
-    top: 0;
-    left: -3px;
-}
-
-button.mark-star-board {
-    background-color: transparent;
-    padding: 0;
-    border: 0 none;
-    color: #000000;
-    cursor: pointer;
-    transition: transform 500ms;
-    transition-timing-function: cubic-bezier(0.75, -3, 0.25, 0.4);
-
-    &.starred {
-        color: #e2b203;
+    button {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+        color: #e76e6e;
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
 
-    &:hover {
-        transform: scale(1.1);
+    .board-link {
+        background-image: url("../../../../assets/images/arrow-forward-outline.png");
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 20px;
+        cursor: pointer;
     }
 }

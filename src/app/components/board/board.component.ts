@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, Renderer2, Signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Renderer2, Signal, ViewChild, WritableSignal, effect, signal, untracked } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { Board } from '../../models/board.model';
@@ -17,7 +18,7 @@ import { AddNewListFormComponent } from './add-new-list-form/add-new-list-form.c
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [NgIf, NgFor, RouterModule, MatButtonModule, MatProgressSpinnerModule, ListComponent, AddNewListFormComponent],
+  imports: [NgIf, NgFor, RouterModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ListComponent, AddNewListFormComponent],
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,6 +30,8 @@ export class BoardComponent {
   public lists!: Signal<List[]>;
   public isLoading: Signal<boolean>;
   public isCreateNewList: Signal<boolean>;
+  public isEditable: WritableSignal<boolean> = signal(false);
+  public boardTitle: WritableSignal<string> = signal('');
 
   public boardId: any;
 
@@ -41,6 +44,12 @@ export class BoardComponent {
     this.lists = this.listsService.lists;
     this.isLoading = this.listsService.isLoading;
     this.isCreateNewList = this.listsService.isCreateNewList;
+
+    effect(() => {
+      untracked(() => {
+        this.boardTitle.set(this.board()?.title || '');
+      });
+    });
   }
 
   ngOnInit() {
@@ -54,6 +63,34 @@ export class BoardComponent {
         this.cardsService.getBoardCards(this.boardId);
       }
     );
+  }
+
+
+  onUpdateBoard() {
+    this.updateBoard(this.boardTitle());
+  }
+
+  private async updateBoard(title: string) {
+    try {
+      title = title.trim();
+      if (title && title !== this.board()?.title) {
+        await this.boardsService.updateBoard(this.boardId, title);
+        this.isEditable.set(false);
+      } else {
+        this.isEditable.set(false);
+      }
+    } catch (err) {
+      this.isEditable.set(false);
+      console.log(err);
+    }
+  }
+
+  onBoardTitleChanged(event: any) {
+    this.boardTitle.set(event.target.value);
+  }
+
+  onToggleEditable() {
+    this.isEditable.set(!this.isEditable());
   }
 
   onToggleCreateNewList() {

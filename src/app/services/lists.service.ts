@@ -54,7 +54,7 @@ export class ListsService {
       value[i].isLoading = true;
     });
     try {
-      const result = await this.supabaseService.client.from(LISTS_TABLE)
+      await this.supabaseService.client.from(LISTS_TABLE)
         .update({ title })
         .eq('id', listId)
         .select('*').single();
@@ -68,6 +68,34 @@ export class ListsService {
       this.lists.mutate(value => {
         value[i].isLoading = false;
       });
+    }
+  }
+
+  async deleteList(listId: any) {
+    this.isCRUDLoading.set(true);
+    const i = this.lists().findIndex((list) => list.id === listId);
+    try {
+      this.lists.mutate(value => {
+        value[i].isLoading = true;
+      });
+      const { error } = await this.supabaseService.client.from(LISTS_TABLE)
+        .delete()
+        .eq('id', listId);
+      if (!error) {
+        const lists = this.lists();
+        this.lists.set(lists.filter((list) => list.id !== listId));
+      } else {
+        this.lists().length > 0 && this.lists.mutate(value => {
+          value[i].isLoading = false;
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      this.lists().length > 0 && this.lists.mutate(value => {
+        value[i].isLoading = false;
+      });
+    } finally {
+      this.isCRUDLoading.set(false);
     }
   }
 

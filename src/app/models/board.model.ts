@@ -5,4 +5,5 @@ export type Board = {
     starred: boolean;
     color?: string;
     isLoading?: boolean;
+    isDeleting?: boolean;
 }

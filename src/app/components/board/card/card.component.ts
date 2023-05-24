@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, Output, Signal, WritableSignal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, Output, Signal, WritableSignal, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Card } from '../../../models/card.model';
@@ -13,7 +13,7 @@ import { CardsService } from '../../../services/cards.service';
   styleUrls: ['./card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardComponent {
+export class CardComponent implements AfterViewInit {
   @Input() card!: Card;
   @Input() isLoading: boolean = false;
   @Input() isDeleting: boolean = false;
@@ -22,11 +22,17 @@ export class CardComponent {
   @Output('onMarkDone') _onMarkDone: EventEmitter<Card> = new EventEmitter<Card>();
 
   selectedCard!: Signal<Card | null>;
-  positionA: number = -1;
-  positionB: number = -1;
 
-  constructor(private dragDropCardsService: DragDropCardsService, private cardsService: CardsService) {
+  isCardLoaded: WritableSignal<boolean> = signal(false);
+
+  constructor(public el: ElementRef, private dragDropCardsService: DragDropCardsService, private cardsService: CardsService) {
     this.selectedCard = this.dragDropCardsService.selectedCard;
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.isCardLoaded.set(true);
+    }, 200);
   }
 
   get attachment(): string {
@@ -69,31 +75,21 @@ export class CardComponent {
   }
 
   @HostListener('dragenter', ['$event'])
-  onDragEnter(_: DragEvent) {
+  onDragEnter(event: DragEvent) {
     const card = this.selectedCard();
-    // console.log('Drag Enter ', card, this.card);
     if (card?.id !== this.card.id) {
-      this.positionA = card?.position || -1;
-      this.positionB = this.card.position || -1;
-      console.log(this.positionB, this.positionA);
-      this.cardsService.updateCardPosition(card?.id, this.positionB);
-      this.cardsService.updateCardPosition(this.card.id, this.positionA);
+      let positionA = card?.position || -1;
+      const positionB = this.card.position || -1;
+      if (positionA === positionB) {
+        positionA += 1;
+      }
+      this.cardsService.updateCardPosition(card?.id, positionB);
+      this.cardsService.updateCardPosition(this.card.id, positionA);
     }
   }
 
   @HostListener('drop', ['$event'])
   onDrop(event: DragEvent) {
-    event.preventDefault();
-    const card = this.selectedCard();
-    console.log(this.positionB, this.positionA);
-    if (this.positionA > -1 && this.positionB > -1) {
-      this.cardsService.updateCard(card?.id, {
-        position: this.positionB
-      }, false);
-      this.cardsService.updateCard(this.card.id, {
-        position: this.positionA
-      }, false);
-      // this.positionA = this.positionB = -1;
-    }
+    // event.preventDefault();
   }
 }

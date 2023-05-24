@@ -1,15 +1,25 @@
 <div class="board-card" [style.backgroundColor]="board.color">
-    <div class="board-title" [routerLink]="['/board', board.id]" [attr.title]="board.title"
-        aria-label="Board Title">{{board.title}}</div>
+    <div class="board-title" [routerLink]="['/board', board.id]" [attr.title]="board.title" aria-label="Board Title">
+        {{board.title}}</div>
     <div class="board-actions">
-        <ng-template [ngIf]="isLoading">
-            <div class="loading">
-                <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
-            </div>
-        </ng-template>
         <button type="button" class="mark-star-board" [class.starred]="board.starred" (click)="onToggleBoardStarred()">
+            <ng-template [ngIf]="isLoading">
+                <div class="loading">
+                    <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+                </div>
+            </ng-template>
             <i class="fa" [class.fa-star-o]="!board.starred" [class.fa-star]="board.starred" aria-hidden="true"></i>
         </button>
     </div>
-    <a class="board-link" [routerLink]="['/board', board.id]"></a>
+    <div class="board-bottom-actions">
+        <button type="button" class="delete-btn" (click)="onDeleteBoard()">
+            <ng-template [ngIf]="isDeleting">
+                <div class="loading">
+                    <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+                </div>
+            </ng-template>
+            <i class="fa fa-trash" aria-hidden="true"></i>
+        </button>
+        <a class="board-link" [routerLink]="['/board', board.id]"></a>
+    </div>
 </div>

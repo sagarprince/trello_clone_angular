@@ -43,7 +43,7 @@ export class AddEditCardModalComponent {
     this.mode = this.data && this.data.mode || 'ADD';
     this.list = this.data && this.data.list || null;
     this.card = this.data && this.data.card || null;
-    this.position = this.data && this.data.position || 1;
+    this.position = this.data && this.data.position || -1;
     this.isLoading = this.cardsService.isCRUDLoading;
     this.setupForm();
   }
@@ -78,7 +78,7 @@ export class AddEditCardModalComponent {
           title,
           description: description.trim(),
           attachments: attachments && attachments.trim(),
-          position: this.position
+          position: this.position > -1 && this.position || this.card.position
         });
       this.onCancel();
     } catch (err) {

@@ -117,14 +117,42 @@ export class CardsService {
       if (!error) {
         const cards = this.cards();
         this.cards.set(cards.filter((card) => card.id !== cardId));
+      } else {
+        this.cards().length > 0 && this.cards.mutate(value => {
+          value[i].isDeleting = false;
+        });
       }
+    } catch (err) {
+      console.log(err);
+      this.cards().length > 0 && this.cards.mutate(value => {
+        value[i].isDeleting = false;
+      });
+    } finally {
+      this.isCRUDLoading.set(false);
+    }
+  }
+
+  removeKey(key: string, {[key]: _, ...rest}) {
+    return rest;
+  }
+
+  async upsertCardsPositions(cards: Card[]) {
+    this.isCRUDLoading.set(true);
+    try {
+      const values = cards.map((card) => {
+        let _card = this.removeKey('prevListId', card);
+        _card = this.removeKey('isLoading', _card);
+        _card = this.removeKey('isDeleting', _card);
+        return {
+          ..._card
+        };
+      })
+      await this.supabaseService.client.from(CARDS_TABLE)
+        .upsert(values).select();
     } catch (err) {
       console.log(err);
     } finally {
       this.isCRUDLoading.set(false);
-      this.cards().length > 0 && this.cards.mutate(value => {
-        value[i].isDeleting = false;
-      });
     }
   }
 

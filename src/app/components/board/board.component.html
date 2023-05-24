@@ -1,6 +1,34 @@
 <div class="board">
     <div class="board__header">
-        <h2>{{board()?.title}}</h2>
+        <div class="board__header__title">
+            <h2 [class.editable]="isEditable()">
+                {{board()?.title}}
+                <ng-template [ngIf]="board()">
+                    <button type="button" (click)="onToggleEditable()">
+                        <mat-icon>mode_edit</mat-icon>
+                    </button>
+                </ng-template>
+            </h2>
+            <div class="input_box" [class.editable]="isEditable()">
+                <div class="input_box__field">
+                    <input type="text" [attr.value]="board()?.title" (keyup)="onBoardTitleChanged($event)"
+                        (keyup.enter)="onUpdateBoard()" />
+                    <ng-template [ngIf]="board()?.isLoading">
+                        <div class="loader">
+                            <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
+                        </div>
+                    </ng-template>
+                </div>
+                <div class="input_box__actions">
+                    <button type="button" class="save-btn" [disabled]="boardTitle() == board()?.title" (click)="onUpdateBoard()">
+                        <mat-icon>done</mat-icon>
+                    </button>
+                    <button type="button" class="cancel-btn" (click)="onToggleEditable()">
+                        <mat-icon>clear</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="board__content">
         <ng-template [ngIf]="isLoading()">

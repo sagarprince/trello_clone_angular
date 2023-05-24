@@ -25,3 +25,32 @@ body {
 a {
     cursor: pointer;
 }
+
+button {
+    cursor: pointer;
+
+    &:disabled {
+        cursor: auto;
+    }
+}
+
+body {
+    .mat-mdc-menu-content {
+        padding: 0;
+    
+        .mat-mdc-menu-item {
+            min-height: 42px;
+    
+            .mat-icon {
+                margin-right: 10px;
+                font-size: 20px;
+                height: 20px;
+                width: 20px;
+            }
+    
+            .mdc-list-item__primary-text {
+                font-size: 0.8rem;
+            }
+        }
+    }
+}

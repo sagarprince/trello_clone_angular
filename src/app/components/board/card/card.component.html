@@ -1,4 +1,4 @@
-<div class="card" draggable="true" [class.dragging]="selectedCard()?.id == card.id">
+<div class="card" draggable="true" [class.loaded]="isCardLoaded()" [class.dragging]="selectedCard()?.id == card.id">
     <div class="card__content">
         <ng-template [ngIf]="hasAttachment">
             <div class="attachment">

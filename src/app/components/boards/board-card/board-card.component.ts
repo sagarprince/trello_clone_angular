@@ -15,9 +15,15 @@ import { Board } from '../../../models/board.model';
 export class BoardCardComponent {
   @Input() board!: Board;
   @Input() isLoading: boolean = false;
+  @Input() isDeleting: boolean = false;
   @Output('onToggleBoardStarred') toggleBoardStarred: EventEmitter<any> = new EventEmitter<any>();
+  @Output('onDelete') onDelete: EventEmitter<any> = new EventEmitter<any>();
 
   public onToggleBoardStarred(): void {
     this.toggleBoardStarred.emit(this.board);
+  }
+
+  public onDeleteBoard(): void {
+    this.onDelete.emit(this.board.id);
   }
 }

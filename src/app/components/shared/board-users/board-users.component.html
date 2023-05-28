@@ -1,0 +1,21 @@
+<ul>
+  <ng-template [ngIf]="isLoading" [ngIfElse]="usersBlock">
+    <li *ngFor="let user of dummyUsers" [attr.title]="user.firstName">
+      <app-avatar [userName]="user.firstName" [imageUrl]="user.profilePicUrl" [isLoading]="isLoading"></app-avatar>
+    </li>
+  </ng-template>
+  <ng-template #usersBlock>
+    <li *ngFor="let user of users | slice:0:usersLimit()" title="{{user.firstName + ' ' + user.lastName}}">
+      <app-avatar [userName]="user.firstName" [imageUrl]="user.profilePicUrl"></app-avatar>
+    </li>
+    <li *ngIf="users.length > limit" class="more-users" [class.disabled]="disableToggle"
+      (click)="!disableToggle && toggleUsers()">
+      <ng-template [ngIf]="remainingUsersCount() == 0">
+        -
+      </ng-template>
+      <ng-template [ngIf]="remainingUsersCount() > 0">
+        {{remainingUsersCount()}}+
+      </ng-template>
+    </li>
+  </ng-template>
+</ul>

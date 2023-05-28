@@ -1,0 +1,35 @@
+<div class="board-card" [style.backgroundColor]="board.color">
+    <ng-template [ngIf]="board.title" [ngIfElse]="boardTitleLoader">
+        <div class="board-title" (click)="navigateToBoard()" [attr.title]="board.title" aria-label="Board Title">
+            {{board.title}}
+        </div>
+    </ng-template>
+    <ng-template #boardTitleLoader>
+        <div class="board-title-loader shimmer-bg"></div>
+    </ng-template>
+    <div class="board-actions">
+        <button type="button" class="mark-star-board" [class.starred]="board.starred" [class.shimmer-bg]="!board.title"
+            [class.shimmer-blur]="!board.title" (click)="onToggleBoardStarred()">
+            <ng-template [ngIf]="isLoading">
+                <div class="loading">
+                    <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+                </div>
+            </ng-template>
+            <i class="fa" [class.fa-star-o]="!board.starred" [class.fa-star]="board.starred" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="board-bottom-actions">
+        <app-board-users [users]="boardUsers" [limit]="6" [isLoading]="isUsersLoading" [disableToggle]="true"></app-board-users>
+        <button type="button" class="delete-btn" [class.shimmer-bg]="!board.title" [class.shimmer-blur]="!board.title"
+            (click)="onDeleteBoard()">
+            <ng-template [ngIf]="isDeleting">
+                <div class="loading">
+                    <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+                </div>
+            </ng-template>
+            <i class="fa fa-trash" aria-hidden="true"></i>
+        </button>
+        <!-- <button type="button" class="board-link-btn" [class.shimmer-bg]="!board.title"
+            [class.shimmer-blur]="!board.title" (click)="navigateToBoard()"></button> -->
+    </div>
+</div>

@@ -1,0 +1,8 @@
+<div class="dashboard-wrap">
+    <header>
+        <app-header [userName]="userName()" [profilePicUrl]="profilePicUrl()" (onProfile)="onProfile()" (onLogout)="onLogout()"></app-header>
+    </header>
+    <main>
+        <router-outlet></router-outlet>
+    </main>
+</div>

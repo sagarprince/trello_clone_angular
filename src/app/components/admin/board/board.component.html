@@ -1,0 +1,86 @@
+<div class="board">
+    <div class="board__header" [class.editable]="isEditable()">
+        <div class="board__header__title">
+            <ng-template [ngIf]="!isEditable()" [ngIfElse]="editable">
+                <h2 [class.shimmer-bg]="isBoardLoading()" [class.shimmer-blured]="isBoardLoading()">
+                    <ng-template [ngIf]="isBoardLoading()" [ngIfElse]="title">
+                        Board Title
+                    </ng-template>
+                    <ng-template #title>
+                        {{board()?.title}}
+                    </ng-template>
+                    <ng-template [ngIf]="board()">
+                        <button type="button" (click)="onToggleEditable()">
+                            <mat-icon>mode_edit</mat-icon>
+                        </button>
+                    </ng-template>
+                </h2>
+            </ng-template>
+            <ng-template #editable>
+                <div class="input_box">
+                    <div class="input_box__field">
+                        <input type="text" [attr.value]="board()?.title" (keyup)="onBoardTitleChanged($event)"
+                            (keyup.enter)="onUpdateBoard()" />
+                        <ng-template [ngIf]="board()?.isLoading">
+                            <div class="loader">
+                                <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
+                            </div>
+                        </ng-template>
+                    </div>
+                    <div class="input_box__actions">
+                        <button type="button" class="save-btn" [disabled]="boardTitle() == board()?.title"
+                            (click)="onUpdateBoard()">
+                            <mat-icon>done</mat-icon>
+                        </button>
+                        <button type="button" class="cancel-btn" (click)="onToggleEditable()">
+                            <mat-icon>clear</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+        <div class="board__header__users">
+            <ng-template [ngIf]="!isEditable() && !isBoardLoading()">
+                <app-board-users [users]="board()?.users || []"
+                    [isLoading]="board()?.isUsersLoading || false"></app-board-users>
+            </ng-template>
+            <ng-template [ngIf]="isBoardLoading()">
+                <app-board-users [isLoading]="true"></app-board-users>
+            </ng-template>
+            <button type="button" title="Add User" [class.shimmer-blur]="isBoardLoading()"
+                (click)="!isBoardLoading() && onAddUser()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </div>
+    <div class="board__content">
+        <div class="lists">
+            <ul>
+                <ng-template [ngIf]="!isLoading()" [ngIfElse]="loading">
+                    <li *ngFor="let list of lists(); trackBy: trackByList">
+                        <app-list [list]="list" [isListLoading]="false" [isLoading]="list.isLoading || false"
+                            [isEditable]="list.isEditable || false"></app-list>
+                    </li>
+                </ng-template>
+                <ng-template #loading>
+                    <li *ngFor="let list of dummyLists;">
+                        <app-list [list]="list" [isListLoading]="true" [isLoading]="list.isLoading || false"
+                            [isEditable]="list.isEditable || false"></app-list>
+                    </li>
+                </ng-template>
+                <li class="add-new-list">
+                    <ng-template [ngIf]="!isCreateNewList()" [ngIfElse]="createNewListForm">
+                        <span [class.shimmer-bg]="isLoading()" [class.shimmer-blur]="isLoading()"
+                            (click)="onToggleCreateNewList()">+ Add New List</span>
+                    </ng-template>
+                    <ng-template #createNewListForm>
+                        <div class="add-new-list-form">
+                            <app-add-new-list-form [boardId]="boardId"
+                                (onClose)="onToggleCreateNewList()"></app-add-new-list-form>
+                        </div>
+                    </ng-template>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

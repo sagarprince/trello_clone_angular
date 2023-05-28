@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
+import { Observable, catchError, finalize, map, throwError } from 'rxjs';
 import { List } from '../models/list.model';
 import { SupabaseService } from './supabase.service';
+import { UtilitiesService } from './utilities.service';
 
 const LISTS_TABLE = 'lists';
 
@@ -15,88 +17,102 @@ export class ListsService {
 
   public isCreateNewList = signal<boolean>(false);
 
-  constructor(private supabaseService: SupabaseService) { }
+  constructor(private supabaseService: SupabaseService, private utilitiesService: UtilitiesService) { }
 
-  async getBoardLists(boardId: any) {
+  public getBoardLists(boardId: any): Observable<any> {
     this.isLoading.set(true);
-    try {
-      const result = await this.supabaseService.client.from(LISTS_TABLE)
-        .select('*').eq('board_id', boardId);
-      console.log(result.data);
-      this.lists.set(result.data as List[]);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isLoading.set(false);
+    return this.supabaseService.get({
+      table: LISTS_TABLE,
+      filters: [
+        {
+          operator: 'eq',
+          key: 'board_id',
+          value: boardId
+        }
+      ]
     }
+    ).pipe(
+      finalize(() => {
+        this.isLoading.set(false);
+      }),
+      map((data) => {
+        this.lists.set(data as List[]);
+      })
+    );
   }
 
-  async createList(boardId: any, title: string) {
+  public createList(boardId: any, title: string): Observable<any> {
     this.isCRUDLoading.set(true);
-    try {
-      const result = await this.supabaseService.client.from(LISTS_TABLE)
-        .insert({ title, 'board_id': boardId })
-        .select('*').single();
-      this.lists.update((value) => {
-        return [...value, result.data as List];
-      });
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isCRUDLoading.set(false);
-    }
+    this.utilitiesService.showLoadingSnackBar();
+    return this.supabaseService.insert({
+      table: LISTS_TABLE,
+      values: { title, 'board_id': boardId }
+    }).pipe(
+      finalize(() => {
+        this.isCRUDLoading.set(false);
+        this.utilitiesService.hideLoadingSnackBar();
+      }),
+      map((data) => {
+        this.lists.update((value) => {
+          return [...value, data as List];
+        });
+      })
+    );
   }
 
-  async updateList(listId: any, title: string) {
+  public updateList(listId: any, values: any, showSnackBar: boolean = true): Observable<any> {
+    this.isCRUDLoading.set(true);
+    showSnackBar && this.utilitiesService.showLoadingSnackBar();
+    const i = this.lists().findIndex((list) => list.id === listId);
+    this.lists.mutate(value => {
+      value[i].isLoading = true;
+    });
+    return this.supabaseService.update({
+      table: LISTS_TABLE,
+      values,
+      equality: { key: 'id', value: listId }
+    }).pipe(
+      finalize(() => {
+        this.isCRUDLoading.set(false);
+        showSnackBar && this.utilitiesService.hideLoadingSnackBar();
+        this.lists.mutate(value => {
+          value[i].isLoading = false;
+        });
+      }),
+      map(() => {
+        Object.entries(values).forEach(([key, value]) => {
+          this.lists.mutate((list: any) => {
+            list[i][key] = value;
+          });
+        });
+      })
+    );
+  }
+
+  public deleteList(listId: any): Observable<any> {
     this.isCRUDLoading.set(true);
     const i = this.lists().findIndex((list) => list.id === listId);
     this.lists.mutate(value => {
       value[i].isLoading = true;
     });
-    try {
-      await this.supabaseService.client.from(LISTS_TABLE)
-        .update({ title })
-        .eq('id', listId)
-        .select('*').single();
-      this.lists.mutate(value => {
-        value[i].title = title;
-      });
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isCRUDLoading.set(false);
-      this.lists.mutate(value => {
-        value[i].isLoading = false;
-      });
-    }
-  }
-
-  async deleteList(listId: any) {
-    this.isCRUDLoading.set(true);
-    const i = this.lists().findIndex((list) => list.id === listId);
-    try {
-      this.lists.mutate(value => {
-        value[i].isLoading = true;
-      });
-      const { error } = await this.supabaseService.client.from(LISTS_TABLE)
-        .delete()
-        .eq('id', listId);
-      if (!error) {
+    return this.supabaseService.delete({
+      table: LISTS_TABLE,
+      equality: { key: 'id', value: listId }
+    }).pipe(
+      finalize(() => {
+        this.isCRUDLoading.set(false);
+      }),
+      map(() => {
         const lists = this.lists();
         this.lists.set(lists.filter((list) => list.id !== listId));
-      } else {
-        this.lists().length > 0 && this.lists.mutate(value => {
+      }),
+      catchError((error) => {
+        this.lists.mutate(value => {
           value[i].isLoading = false;
         });
-      }
-    } catch (err) {
-      console.log(err);
-      this.lists().length > 0 && this.lists.mutate(value => {
-        value[i].isLoading = false;
-      });
-    } finally {
-      this.isCRUDLoading.set(false);
-    }
+        return throwError(() => error);
+      })
+    );
   }
 
   toggleListEditable(listId: any): void {

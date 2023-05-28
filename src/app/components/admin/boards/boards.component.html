@@ -1,0 +1,69 @@
+<div class="boards-container">
+    <ng-template [ngIf]="hasStarredBoards()">
+        <section class="starred-boards-section">
+            <h3>
+                Starred Boards
+            </h3>
+            <ng-template [ngIf]="!isLoading()" [ngIfElse]="starredLoading">
+                <ul>
+                    <ng-container *ngFor="let board of starredBoards(); let i = index">
+                        <li>
+                            <app-board-card [board]="board" [boardUsers]="board.users || []"
+                                [isUsersLoading]="board.isUsersLoading || false" [isLoading]="board.isLoading || false"
+                                [isDeleting]="board.isDeleting || false"
+                                (onToggleBoardStarred)="onToggleBoardStarred($event)"
+                                (onDelete)="onDeleteBoard($event)"></app-board-card>
+                        </li>
+                    </ng-container>
+                </ul>
+            </ng-template>
+            <ng-template #starredLoading>
+                <ul>
+                    <ng-container *ngFor="let board of dummyBoards; let i = index">
+                        <li>
+                            <app-board-card [board]="board" [boardUsers]="board.users || []"
+                                [isUsersLoading]="board.isUsersLoading || false" [isLoading]="board.isLoading || false"
+                                [isDeleting]="board.isDeleting || false"
+                                (onToggleBoardStarred)="onToggleBoardStarred($event)"
+                                (onDelete)="onDeleteBoard($event)"></app-board-card>
+                        </li>
+                    </ng-container>
+                </ul>
+            </ng-template>
+        </section>
+    </ng-template>
+    <section>
+        <h3>
+            Your Boards
+        </h3>
+        <ng-template [ngIf]="!isLoading()" [ngIfElse]="loading">
+            <ul>
+                <ng-container *ngFor="let board of boards(); let i = index">
+                    <li>
+                        <app-board-card [board]="board" [boardUsers]="board.users || []"
+                            [isUsersLoading]="board.isUsersLoading || false" [isLoading]="board.isLoading || false"
+                            [isDeleting]="board.isDeleting || false"
+                            (onToggleBoardStarred)="onToggleBoardStarred($event)"
+                            (onDelete)="onDeleteBoard($event)"></app-board-card>
+                    </li>
+                </ng-container>
+                <li class="create-board" (click)="onCreateBoard()">
+                    Create New Board
+                </li>
+            </ul>
+        </ng-template>
+        <ng-template #loading>
+            <ul>
+                <ng-container *ngFor="let board of dummyBoards; let i = index">
+                    <li>
+                        <app-board-card [board]="board" [boardUsers]="board.users || []"
+                            [isUsersLoading]="board.isUsersLoading || false" [isLoading]="board.isLoading || false"
+                            [isDeleting]="board.isDeleting || false"
+                            (onToggleBoardStarred)="onToggleBoardStarred($event)"
+                            (onDelete)="onDeleteBoard($event)"></app-board-card>
+                    </li>
+                </ng-container>
+            </ul>
+        </ng-template>
+    </section>
+</div>

@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
+import { Observable, catchError, finalize, map, throwError } from 'rxjs';
 import { Card } from '../models/card.model';
 import { SupabaseService } from './supabase.service';
+import { UtilitiesService } from './utilities.service';
 
 const CARDS_TABLE = 'cards';
 
@@ -13,22 +15,30 @@ export class CardsService {
   public isLoading = signal<boolean>(false);
   public isCRUDLoading = signal<boolean>(false);
 
-  constructor(private supabaseService: SupabaseService) { }
+  constructor(private supabaseService: SupabaseService, private utilitiesService: UtilitiesService) { }
 
-  async getBoardCards(boardId: any) {
+  public getBoardCards(boardId: any): Observable<any> {
     this.isLoading.set(true);
-    try {
-      const result = await this.supabaseService.client.from(CARDS_TABLE)
-        .select('*').eq('board_id', boardId);
-      this.cards.set(result.data as Card[]);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isLoading.set(false);
-    }
+    return this.supabaseService.get({
+      table: CARDS_TABLE,
+      filters: [
+        {
+          operator: 'eq',
+          key: 'board_id',
+          value: boardId
+        }
+      ]
+    }).pipe(
+      finalize(() => {
+        this.isLoading.set(false);
+      }),
+      map((data) => {
+        this.cards.set(data as Card[]);
+      })
+    );
   }
 
-  async saveCard(mode: string = 'ADD', cardId: number, values: {
+  public saveCard(mode: string = 'ADD', cardId: number, values: {
     list_id: number;
     board_id: number;
     title: string;
@@ -36,124 +46,128 @@ export class CardsService {
     attachments?: string;
     done?: boolean;
     position?: number;
-  }) {
+  }): Observable<any> {
     this.isCRUDLoading.set(true);
-    const i = mode === 'EDIT' ? this.cards().findIndex((card) => card.id === cardId) : -1;
-    try {
-      if (mode === 'ADD') {
-        const { data } = await this.supabaseService.client.from(CARDS_TABLE)
-          .insert({ ...values })
-          .select('*').single();
-        data && this.cards.update((value) => {
-          return [...value, data as Card];
-        });
-      } else {
-        if (i > -1) {
-          this.cards.mutate(value => {
-            value[i].isLoading = true;
+    this.utilitiesService.showLoadingSnackBar();
+    if (mode === 'ADD') {
+      return this.supabaseService.insert({
+        table: CARDS_TABLE,
+        values
+      }).pipe(
+        finalize(() => {
+          this.isCRUDLoading.set(false);
+          this.utilitiesService.hideLoadingSnackBar();
+        }),
+        map((data) => {
+          this.cards.update((value) => {
+            return [...value, data as Card];
           });
-          const result = await this.supabaseService.client.from(CARDS_TABLE)
-            .update({ ...values })
-            .eq('id', cardId)
-            .select('*').single();
-          this.cards.mutate(value => {
-            value[i] = {
-              ...(result.data as Card)
-            };
-          });
-        }
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isCRUDLoading.set(false);
-      i > -1 && this.cards.mutate(value => {
-        value[i].isLoading = false;
-      });
-    }
-  }
-
-  async updateCard(cardId: any, values = {}, allowMutate: boolean = true, errorCallback: VoidFunction = () => { }) {
-    this.isCRUDLoading.set(true);
-    const i = this.cards().findIndex((card) => card.id === cardId);
-
-    try {
+        })
+      );
+    } else {
+      const i = mode === 'EDIT' ? this.cards().findIndex((card) => card.id === cardId) : -1;
       this.cards.mutate(value => {
         value[i].isLoading = true;
       });
-      const { data } = await this.supabaseService.client.from(CARDS_TABLE)
-        .update(values)
-        .eq('id', cardId)
-        .select('*').single();
-      if (data) {
-        allowMutate && this.cards.mutate(value => {
-          value[i] = {
-            ...(data as Card)
-          };
-        });
-      } else {
-        errorCallback();
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isCRUDLoading.set(false);
-      this.cards.mutate(value => {
-        value[i].isLoading = false;
-      });
+      return this.supabaseService.update({
+        table: CARDS_TABLE,
+        values,
+        equality: {
+          key: 'id',
+          value: cardId
+        }
+      }).pipe(
+        finalize(() => {
+          this.isCRUDLoading.set(false);
+          this.utilitiesService.hideLoadingSnackBar();
+          this.cards.mutate(value => {
+            value[i].isLoading = false;
+          });
+        }),
+        map((data) => {
+          this.cards.mutate(value => {
+            value[i] = {
+              ...(data as Card)
+            };
+          });
+        })
+      );
     }
   }
 
-  async deleteCard(cardId: any) {
+  public updateCard(cardId: any, values: any, allowMutate: boolean = true, showSnackBar: boolean = true): Observable<any> {
+    this.isCRUDLoading.set(true);
+    showSnackBar && this.utilitiesService.showLoadingSnackBar();
+    const i = this.cards().findIndex((card) => card.id === cardId);
+    this.cards.mutate(value => {
+      value[i].isLoading = true;
+    });
+    return this.supabaseService.update({
+      table: CARDS_TABLE,
+      values,
+      equality: { key: 'id', value: cardId }
+    }).pipe(
+      finalize(() => {
+        this.isCRUDLoading.set(false);
+        showSnackBar && this.utilitiesService.hideLoadingSnackBar();
+        this.cards.mutate(value => {
+          value[i].isLoading = false;
+        });
+      }),
+      map(() => {
+        allowMutate && Object.entries(values).forEach(([key, value]) => {
+          this.cards.mutate((card: any) => {
+            card[i][key] = value;
+          });
+        });
+      })
+    );
+  }
+
+  public deleteCard(cardId: any): Observable<any> {
     this.isCRUDLoading.set(true);
     const i = this.cards().findIndex((card) => card.id === cardId);
-    try {
-      this.cards.mutate(value => {
-        value[i].isDeleting = true;
-      });
-      const { error } = await this.supabaseService.client.from(CARDS_TABLE)
-        .delete()
-        .eq('id', cardId);
-      if (!error) {
+    this.cards.mutate(value => {
+      value[i].isDeleting = true;
+    });
+    return this.supabaseService.delete({
+      table: CARDS_TABLE,
+      equality: { key: 'id', value: cardId }
+    }).pipe(
+      finalize(() => {
+        this.isCRUDLoading.set(false);
+      }),
+      map(() => {
         const cards = this.cards();
         this.cards.set(cards.filter((card) => card.id !== cardId));
-      } else {
-        this.cards().length > 0 && this.cards.mutate(value => {
+      }),
+      catchError((error) => {
+        this.cards.mutate(value => {
           value[i].isDeleting = false;
         });
-      }
-    } catch (err) {
-      console.log(err);
-      this.cards().length > 0 && this.cards.mutate(value => {
-        value[i].isDeleting = false;
-      });
-    } finally {
-      this.isCRUDLoading.set(false);
-    }
-  }
-
-  removeKey(key: string, {[key]: _, ...rest}) {
-    return rest;
-  }
-
-  async upsertCardsPositions(cards: Card[]) {
-    this.isCRUDLoading.set(true);
-    try {
-      const values = cards.map((card) => {
-        let _card = this.removeKey('prevListId', card);
-        _card = this.removeKey('isLoading', _card);
-        _card = this.removeKey('isDeleting', _card);
-        return {
-          ..._card
-        };
+        return throwError(() => error);
       })
-      await this.supabaseService.client.from(CARDS_TABLE)
-        .upsert(values).select();
-    } catch (err) {
-      console.log(err);
-    } finally {
-      this.isCRUDLoading.set(false);
-    }
+    );
+  }
+
+  public upsertCardsPositions(cards: Card[]): Observable<any> {
+    this.isCRUDLoading.set(true);
+    const values = cards.map((card) => {
+      let _card = this.utilitiesService.removeKey('prevListId', card);
+      _card = this.utilitiesService.removeKey('isLoading', _card);
+      _card = this.utilitiesService.removeKey('isDeleting', _card);
+      return {
+        ..._card
+      };
+    })
+    return this.supabaseService.upsert({
+      table: CARDS_TABLE,
+      values,
+    }).pipe(
+      finalize(() => {
+        this.isCRUDLoading.set(false);
+      })
+    );
   }
 
   async updateCardList(cardId: any, listId: any) {

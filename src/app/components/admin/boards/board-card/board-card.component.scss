@@ -1,0 +1,109 @@
+.board-card {
+    position: relative;
+    background-color: #f4f4ff;
+    height: 80px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 8px 5px 20px -12px rgba(0, 0, 0, 0.38);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.board-title {
+    font-size: 16px;
+    font-weight: 400;
+    color: #000000;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    padding-right: 20px;
+    cursor: pointer;
+}
+
+.board-title-loader {
+    width: 80%;
+    height: 20px;
+}
+
+button {
+    background-color: transparent;
+    padding: 0;
+    border: 0 none;
+}
+
+.board-actions {
+    position: absolute;
+    top: 20px;
+    bottom: auto;
+    left: auto;
+    right: 18px;
+
+    button {
+        position: relative;
+        color: #000000;
+        transition: transform 500ms;
+        transition-timing-function: cubic-bezier(0.75, -3, 0.25, 0.4);
+
+        &.starred {
+            color: #e2b203;
+        }
+
+        &:hover {
+            transform: scale(1.1);
+        }
+
+        .loading {
+            position: absolute;
+            top: -2px;
+            left: -4px;
+        }
+    }
+}
+
+.board-bottom-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    ::ng-deep {
+        app-board-users {
+            ul {
+                li {
+                    width: 30px;
+                    height: 30px;
+                }
+            }
+        }
+    }
+
+    button {
+        position: relative;
+        width: 15px;
+        height: 20px;
+        font-size: 1rem;
+        color: #e76e6e;
+        margin-right: -2px;
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    .board-link-btn {
+        background-image: url("../../../../../assets/images/arrow-forward-outline.png");
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 20px;
+        cursor: pointer;
+    }
+}

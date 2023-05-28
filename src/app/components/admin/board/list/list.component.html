@@ -1,0 +1,45 @@
+<div class="list" [class.dragging]="dragOnList()?.id" [class.active]="list.id == dragOnList()?.id">
+    <div class="list__header" [class.shimmer-bg]="isListLoading">
+        <div class="list__header__left">
+            <span class="text" [class.editable]="isEditable" [class.shimmer-blured]="isListLoading"
+                (click)="onToggleListEditable()">{{!isListLoading ? title : 'Dummy List Title'}}</span>
+            <div class="input_box" [class.editable]="isEditable">
+                <input type="text" [(ngModel)]="title" (keyup.enter)="onUpdateList()" />
+                <ng-template [ngIf]="isLoading">
+                    <div class="loader">
+                        <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+        <button class="more-menu-btn" [matMenuTriggerFor]="menu" aria-label="List Menu">
+            <span class="icon"></span>
+        </button>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="onDeleteList()">
+                <mat-icon>delete</mat-icon>
+                Delete
+            </button>
+        </mat-menu>
+    </div>
+    <div class="list__cards">
+        <ul>
+            <ng-template [ngIf]="!isCardsLoading() && !isListLoading" [ngIfElse]="loadingCards">
+                <li *ngFor="let card of cards(); trackBy: trackByCard">
+                    <app-card [card]="card" [isLoading]="card.isLoading || false"
+                        [isDeleting]="card.isDeleting || false" (onEdit)="onEditCard($event)"
+                        (onDelete)="onDeleteCard($event)" (onMarkDone)="onMarkDoneCard($event)"></app-card>
+                </li>
+            </ng-template>
+            <ng-template #loadingCards>
+                <li *ngFor="let card of dummyCards">
+                    <app-card [card]="card" [isCardLoading]="isCardsLoading() && isListLoading"></app-card>
+                </li>
+            </ng-template>
+            <li class="add-new-card" [class.shimmer-bg]="isCardsLoading() && isListLoading"
+                [class.shimmer-blured]="isCardsLoading() && isListLoading" (click)="onCreateCard()">
+                + Add New Card
+            </li>
+        </ul>
+    </div>
+</div>
